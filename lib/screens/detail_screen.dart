@@ -22,7 +22,7 @@ class DetailScreen extends StatelessWidget {
                 width: double.infinity,
                 height: 300,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => const SizedBox(
+                errorBuilder: (context, error, stackTrace) => const SizedBox(
                   height: 300,
                   child: Center(child: Icon(Icons.movie, size: 100)),
                 ),
