@@ -1,78 +1,82 @@
-# 🎬 Filmopedia — Application Flutter Certifiée
+# 🎬 Filmopedia — Application Flutter Certifiée (Version Finale)
 
-Filmopedia est une application de gestion de catalogue de films développée avec **Flutter**. Ce projet démontre la maîtrise des concepts fondamentaux : navigation complexe, gestion d'état, architecture logicielle propre, responsivité et tests automatisés.
+Filmopedia est une application mobile et tablette complète développée avec **Flutter**. Ce projet valide l'ensemble des compétences requises pour la certification : architecture propre, navigation avancée, gestion d'état, responsivité, et tests automatisés.
 
 ---
 
-## 🏗️ Architecture du Projet
+## ✅ État du Projet
+- **Fonctionnalités** : 100% Implémentées.
+- **Qualité** : 100% des tests passent (`flutter test`).
+- **CI/CD** : Pipeline GitHub Actions opérationnel (Build & Tests automatiques).
+- **Responsivité** : Interface adaptative Mobile/Tablette.
 
-Le projet suit une architecture **Layer-First** (par couches), favorisant la séparation des responsabilités et la maintenance du code.
+---
+
+## 🏗️ Architecture Technique (Service Pattern)
+
+Le projet utilise une séparation stricte des responsabilités pour garantir la maintenabilité :
+
+- **Services** : Le `FilmService` centralise la gestion des données (Singleton).
+- **Models** : Objets métiers typés (`Item`).
+- **Screens** : UI découpée en 4 écrans distincts.
+- **Widgets** : Composants atomiques réutilisables.
+- **Router** : Navigation déclarative avec `go_router`.
 
 ```text
 lib/
-├── data/           # Données brutes et constantes (Source de vérité initiale)
-│   └── dummy_data.dart
-├── models/         # Modèles de données (Classes Item/Film)
-│   └── item.dart
-├── services/       # Logique métier et accès aux données (Service Pattern)
-│   └── film_service.dart
-├── screens/        # Écrans principaux de l'application (UI de haut niveau)
-│   ├── list_screen.dart        # Catalogue avec recherche
-│   ├── detail_screen.dart      # Détails du film
-│   ├── add_item_screen.dart    # Formulaire avec validation
-│   └── settings_screen.dart    # Paramètres et Thème
-├── widgets/        # Composants UI réutilisables et atomiques
-│   ├── custom_card.dart
-│   ├── rating_badge.dart
-│   └── search_bar_input.dart
-├── theme/          # Configuration visuelle (Styles Material 3)
-│   └── app_theme.dart
-├── router/         # Définition des routes et navigation (GoRouter)
-│   └── app_router.dart
-└── main.dart       # Point d'entrée de l'application
+├── services/   # Logique de données (FilmService)
+├── screens/    # List, Detail, Add, Settings
+├── widgets/    # CustomCard, RatingBadge, SearchBarInput
+├── models/     # Item model
+├── router/     # GoRouter configuration
+└── theme/      # Material 3 Light/Dark themes
 ```
 
 ---
 
-## 🛠️ Détails Techniques et Choix d'Implémentation
+## 🚀 Fonctionnalités Clés
 
-### 1. Navigation & Routage
-*   **GoRouter** : Utilisation du package `go_router` pour une gestion déclarative des routes.
-*   **Passage de paramètres** : Les données complexes sont transmises via l'attribut `extra` des routes, évitant ainsi des appels répétés aux services.
-
-### 2. Gestion des Données (Service Pattern)
-*   **Singleton Pattern** : Le `FilmService` est implémenté en tant que Singleton pour garantir une instance unique des données à travers toute l'application.
-*   **Découplage** : L'UI communique uniquement avec le service, jamais directement avec la liste de données brute (`dummyItems`).
-
-### 3. Interface Utilisateur (UI/UX)
-*   **Responsivité** : Utilisation de `LayoutBuilder` pour calculer dynamiquement le nombre de colonnes du `GridView` (2 sur Mobile, 3 sur Tablette/Desktop).
-*   **Feedback Visuel** : 
-    *   `CircularProgressIndicator` lors de la simulation d'enregistrement.
-    *   Gestion des erreurs d'images via `errorBuilder`.
-    *   SnackBars pour confirmer les actions utilisateur.
-*   **Thème** : Support complet du mode Clair et Sombre via `ThemeMode` et `Material3`.
-
-### 4. Qualité Logicielle & Automatisation
-*   **Tests Unitaires** : Tests de la logique du service dans `test/unit_test.dart` (recherche, ajout).
-*   **Tests de Widgets** : Validation de l'existence des éléments clés de l'interface dans `test/widget_test.dart`.
-*   **CI/CD (GitHub Actions)** : Pipeline configuré pour exécuter `flutter test` à chaque Push ou Pull Request, garantissant la non-régression du code.
+1.  **Catalogue Dynamique** : Grille responsive avec filtrage en temps réel par titre.
+2.  **Navigation Nommée** : Passage d'objets complexes entre écrans via `go_router`.
+3.  **Formulaire Validé** : Ajout de films avec validation stricte (Titre, Catégorie, Note 0-10).
+4.  **Thème Adaptatif** : Basculement manuel ou système entre mode Clair et Sombre.
+5.  **Performance** : Chargement optimisé des images avec indicateurs de progression et gestion d'erreurs.
 
 ---
 
-## ⚙️ Exigences Techniques Remplies
+## 🧪 Tests & Qualité
 
-| Critère | Détail |
-| :--- | :--- |
-| **Widgets (+8)** | GridView, ListView, Stack, Card, Form, TextFormField, LayoutBuilder, CircularProgressIndicator, InkWell, Hero. |
-| **Widgets Réutilisables** | CustomCard, RatingBadge, SearchBarInput. |
-| **Validation Formulaire** | 3 champs (Titre, Catégorie, Note) avec expressions régulières et vérification de types. |
-| **Navigation** | Routes nommées via GoRouter. |
+Le projet inclut une suite de tests garantissant la stabilité de l'application :
+
+*   **Tests Unitaires** : Validation du moteur de recherche et de l'ajout de données.
+*   **Tests de Widgets** : Vérification de l'intégrité de l'interface utilisateur.
+*   **Analyse Statique** : Code propre sans avertissements (`flutter analyze` OK).
 
 ---
 
-## 🚀 Instructions de lancement
+## 🛠️ Installation et Lancement
 
-1.  **Clonage** : `git clone <url-du-repo>`
-2.  **Dépendances** : `flutter pub get`
-3.  **Lancement des Tests** : `flutter test`
-4.  **Exécution** : `flutter run`
+### Prérequis
+- Flutter SDK (dernière version stable)
+- Un émulateur ou appareil physique
+
+### Commandes
+1.  **Récupérer les dépendances** :
+    ```bash
+    flutter pub get
+    ```
+2.  **Lancer les tests** :
+    ```bash
+    flutter test
+    ```
+3.  **Démarrer l'application** :
+    ```bash
+    flutter run
+    ```
+
+---
+
+## 📱 Aperçu
+*(Insérez vos captures d'écran ici pour une présentation optimale)*
+- 📱 **Mobile** : Grille 2 colonnes.
+- 💻 **Tablette** : Grille 3 colonnes.
