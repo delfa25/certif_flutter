@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../data/dummy_data.dart';
 import '../models/item.dart';
 import '../widgets/custom_card.dart';
 import '../widgets/search_bar_input.dart';
+import '../services/film_service.dart';
 
 class ListScreen extends StatefulWidget {
   final VoidCallback onToggleTheme;
@@ -14,22 +14,25 @@ class ListScreen extends StatefulWidget {
 }
 
 class _ListScreenState extends State<ListScreen> {
-  // Liste filtrée pour la recherche
-  List<Item> _filteredItems = [];
+  final FilmService _filmService = FilmService();
+  List<Item> _displayItems = [];
+  String _currentQuery = '';
 
   @override
   void initState() {
     super.initState();
-    _filteredItems = dummyItems;
+    _refreshList();
   }
 
-  // Fonction de recherche simple
-  void _filterItems(String query) {
+  void _refreshList() {
     setState(() {
-      _filteredItems = dummyItems
-          .where((item) => item.title.toLowerCase().contains(query.toLowerCase()))
-          .toList();
+      _displayItems = _filmService.searchFilms(_currentQuery);
     });
+  }
+
+  void _onSearch(String query) {
+    _currentQuery = query;
+    _refreshList();
   }
 
   @override
@@ -46,32 +49,34 @@ class _ListScreenState extends State<ListScreen> {
       ),
       body: Column(
         children: [
-          // Widget réutilisable 1
           Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: SearchBarInput(onChanged: _filterItems),
+            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+            child: SearchBarInput(onChanged: _onSearch),
           ),
           Expanded(
             child: LayoutBuilder(
               builder: (context, constraints) {
-                // Responsive : 2 colonnes sur mobile, 3 sur tablette (largeur > 600)
+                // Adaptabilité : colonnes et marges selon la largeur
                 int columns = constraints.maxWidth > 600 ? 3 : 2;
-                
+                double padding = constraints.maxWidth > 600 ? 16.0 : 8.0;
+
+                if (_displayItems.isEmpty) {
+                  return const Center(child: Text('Aucun film trouvé.'));
+                }
+
                 return GridView.builder(
-                  padding: const EdgeInsets.all(8),
+                  padding: EdgeInsets.all(padding),
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: columns,
                     childAspectRatio: 0.7,
-                    crossAxisSpacing: 8,
-                    mainAxisSpacing: 8,
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 10,
                   ),
-                  itemCount: _filteredItems.length,
+                  itemCount: _displayItems.length,
                   itemBuilder: (context, index) {
-                    final item = _filteredItems[index];
-                    // Widget réutilisable 2
                     return CustomCard(
-                      item: item,
-                      onTap: () => context.push('/detail', extra: item),
+                      item: _displayItems[index],
+                      onTap: () => context.push('/detail', extra: _displayItems[index]),
                     );
                   },
                 );
@@ -82,11 +87,8 @@ class _ListScreenState extends State<ListScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          // Attendre le retour de l'écran d'ajout pour rafraîchir la liste
           await context.push('/add');
-          setState(() {
-            _filteredItems = dummyItems;
-          });
+          _refreshList();
         },
         child: const Icon(Icons.add),
       ),

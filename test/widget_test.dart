@@ -3,14 +3,17 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:certif_flutter/main.dart';
 
 void main() {
-  testWidgets('App smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
+  testWidgets('Test de rendu de l\'écran principal', (WidgetTester tester) async {
+    // Charger l'application
     await tester.pumpWidget(const MyApp());
 
-    // Vérifie que le titre est présent
+    // Vérifier que le titre est affiché
     expect(find.text('Filmopedia'), findsOneWidget);
 
-    // Vérifie que le bouton d'ajout est là
+    // Vérifier la présence de la barre de recherche
+    expect(find.byType(TextField), findsOneWidget);
+
+    // Vérifier la présence du bouton d'ajout
     expect(find.byType(FloatingActionButton), findsOneWidget);
   });
 }

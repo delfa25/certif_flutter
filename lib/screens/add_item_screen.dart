@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../data/dummy_data.dart';
 import '../models/item.dart';
+import '../services/film_service.dart';
 
 class AddItemScreen extends StatefulWidget {
   const AddItemScreen({super.key});
@@ -12,32 +12,45 @@ class AddItemScreen extends StatefulWidget {
 
 class _AddItemScreenState extends State<AddItemScreen> {
   final _formKey = GlobalKey<FormState>();
-  
-  // Contrôleurs pour récupérer le texte
   final _titleController = TextEditingController();
   final _categoryController = TextEditingController();
   final _ratingController = TextEditingController();
+  bool _isSaving = false;
 
-  void _saveForm() {
+  void _saveForm() async {
     if (_formKey.currentState!.validate()) {
-      // Création d'un nouvel objet Item
-      final newItem = Item(
-        id: DateTime.now().toString(),
-        title: _titleController.text,
-        category: _categoryController.text,
-        rating: double.parse(_ratingController.text),
-        description: 'Nouveau film ajouté au catalogue.',
-        imageUrl: 'https://picsum.photos/400/300?random=${DateTime.now().millisecond}',
-      );
-
-      // Ajout à la liste globale (simple pour un débutant)
-      dummyItems.add(newItem);
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Film enregistré !')),
-      );
+      setState(() => _isSaving = true);
       
-      context.pop(); // Retour à la liste
+      try {
+        // Simulation d'un délai réseau pour montrer l'indicateur de chargement
+        await Future.delayed(const Duration(milliseconds: 500));
+
+        final newItem = Item(
+          id: DateTime.now().toString(),
+          title: _titleController.text,
+          category: _categoryController.text,
+          rating: double.parse(_ratingController.text),
+          description: 'Nouveau film ajouté au catalogue.',
+          imageUrl: 'https://picsum.photos/400/300?random=${DateTime.now().millisecond}',
+        );
+
+        FilmService().addFilm(newItem);
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Film enregistré avec succès !')),
+          );
+          context.pop();
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Erreur lors de l\'enregistrement.')),
+          );
+        }
+      } finally {
+        if (mounted) setState(() => _isSaving = false);
+      }
     }
   }
 
@@ -53,29 +66,35 @@ class _AddItemScreenState extends State<AddItemScreen> {
             children: [
               TextFormField(
                 controller: _titleController,
-                decoration: const InputDecoration(labelText: 'Titre'),
+                decoration: const InputDecoration(labelText: 'Titre', border: OutlineInputBorder()),
                 validator: (value) => value!.isEmpty ? 'Entrez un titre' : null,
               ),
+              const SizedBox(height: 12),
               TextFormField(
                 controller: _categoryController,
-                decoration: const InputDecoration(labelText: 'Catégorie'),
+                decoration: const InputDecoration(labelText: 'Catégorie', border: OutlineInputBorder()),
                 validator: (value) => value!.isEmpty ? 'Entrez une catégorie' : null,
               ),
+              const SizedBox(height: 12),
               TextFormField(
                 controller: _ratingController,
-                decoration: const InputDecoration(labelText: 'Note (0 à 10)'),
+                decoration: const InputDecoration(labelText: 'Note (0 à 10)', border: OutlineInputBorder()),
                 keyboardType: TextInputType.number,
                 validator: (value) {
-                  if (value!.isEmpty) return 'Entrez une note';
-                  if (double.tryParse(value) == null) return 'Nombre invalide';
+                  if (value == null || value.isEmpty) return 'Entrez une note';
+                  final n = double.tryParse(value);
+                  if (n == null || n < 0 || n > 10) return 'Note entre 0 et 10';
                   return null;
                 },
               ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _saveForm,
-                child: const Text('Enregistrer'),
-              ),
+              const SizedBox(height: 24),
+              _isSaving 
+                ? const Center(child: CircularProgressIndicator())
+                : ElevatedButton(
+                    onPressed: _saveForm,
+                    style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, 50)),
+                    child: const Text('Enregistrer'),
+                  ),
             ],
           ),
         ),
