@@ -1,32 +1,38 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:certif_flutter/router/app_router.dart';
-import 'package:certif_flutter/theme/app_theme.dart';
-import 'package:certif_flutter/providers/catalog_provider.dart';
+import 'router/app_router.dart';
+import 'theme/app_theme.dart';
 
 void main() {
-  runApp(
-    ChangeNotifierProvider(
-      create: (_) => CatalogProvider(),
-      child: const MyApp(),
-    ),
-  );
+  runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final catalogProvider = Provider.of<CatalogProvider>(context);
+  State<MyApp> createState() => _MyAppState();
+}
 
+class _MyAppState extends State<MyApp> {
+  // Gestion simple du thème (Clair/Sombre)
+  ThemeMode _themeMode = ThemeMode.light;
+
+  void _toggleTheme() {
+    setState(() {
+      _themeMode = _themeMode == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return MaterialApp.router(
       title: 'Filmopedia',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      themeMode: catalogProvider.themeMode,
-      routerConfig: appRouter,
+      themeMode: _themeMode,
+      // On passe la fonction de basculement au routeur
+      routerConfig: createRouter(_toggleTheme),
     );
   }
 }

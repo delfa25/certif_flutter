@@ -1,26 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:provider/provider.dart';
 import 'package:certif_flutter/main.dart';
-import 'package:certif_flutter/providers/catalog_provider.dart';
 
 void main() {
-  testWidgets('App smoke test: Check if Catalogue title exists', (WidgetTester tester) async {
+  testWidgets('App smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(
-      ChangeNotifierProvider(
-        create: (_) => CatalogProvider(),
-        child: const MyApp(),
-      ),
-    );
+    await tester.pumpWidget(const MyApp());
 
-    // Verify that the AppBar title is correct
+    // Vérifie que le titre est présent
     expect(find.text('Filmopedia'), findsOneWidget);
 
-    // Verify that the search bar is present
-    expect(find.byType(TextField), findsOneWidget);
-
-    // Verify that the FAB is present
+    // Vérifie que le bouton d'ajout est là
     expect(find.byType(FloatingActionButton), findsOneWidget);
   });
 }

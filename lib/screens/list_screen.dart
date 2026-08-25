@@ -1,28 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
+import '../data/dummy_data.dart';
 import '../models/item.dart';
 import '../widgets/custom_card.dart';
 import '../widgets/search_bar_input.dart';
-import '../providers/catalog_provider.dart';
 
 class ListScreen extends StatefulWidget {
-  const ListScreen({super.key});
+  final VoidCallback onToggleTheme;
+  const ListScreen({super.key, required this.onToggleTheme});
 
   @override
   State<ListScreen> createState() => _ListScreenState();
 }
 
 class _ListScreenState extends State<ListScreen> {
-  String _searchQuery = '';
+  // Liste filtrée pour la recherche
+  List<Item> _filteredItems = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _filteredItems = dummyItems;
+  }
+
+  // Fonction de recherche simple
+  void _filterItems(String query) {
+    setState(() {
+      _filteredItems = dummyItems
+          .where((item) => item.title.toLowerCase().contains(query.toLowerCase()))
+          .toList();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    final catalogProvider = Provider.of<CatalogProvider>(context);
-    final items = catalogProvider.items.where((item) {
-      return item.title.toLowerCase().contains(_searchQuery.toLowerCase());
-    }).toList();
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Filmopedia'),
@@ -31,51 +42,52 @@ class _ListScreenState extends State<ListScreen> {
             icon: const Icon(Icons.settings),
             onPressed: () => context.push('/settings'),
           ),
-          IconButton(
-            icon: Icon(catalogProvider.themeMode == ThemeMode.dark 
-              ? Icons.light_mode 
-              : Icons.dark_mode),
-            onPressed: () => catalogProvider.toggleTheme(),
+        ],
+      ),
+      body: Column(
+        children: [
+          // Widget réutilisable 1
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: SearchBarInput(onChanged: _filterItems),
+          ),
+          Expanded(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                // Responsive : 2 colonnes sur mobile, 3 sur tablette (largeur > 600)
+                int columns = constraints.maxWidth > 600 ? 3 : 2;
+                
+                return GridView.builder(
+                  padding: const EdgeInsets.all(8),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: columns,
+                    childAspectRatio: 0.7,
+                    crossAxisSpacing: 8,
+                    mainAxisSpacing: 8,
+                  ),
+                  itemCount: _filteredItems.length,
+                  itemBuilder: (context, index) {
+                    final item = _filteredItems[index];
+                    // Widget réutilisable 2
+                    return CustomCard(
+                      item: item,
+                      onTap: () => context.push('/detail', extra: item),
+                    );
+                  },
+                );
+              },
+            ),
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Column(
-          children: [
-            SearchBarInput(onChanged: (value) {
-              setState(() {
-                _searchQuery = value;
-              });
-            }),
-            const SizedBox(height: 12),
-            Expanded(
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  int crossAxisCount = constraints.maxWidth > 600 ? 3 : 2;
-                  return GridView.builder(
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: crossAxisCount,
-                      childAspectRatio: 0.75,
-                      crossAxisSpacing: 10,
-                      mainAxisSpacing: 10,
-                    ),
-                    itemCount: items.length,
-                    itemBuilder: (context, index) {
-                      return CustomCard(
-                        item: items[index],
-                        onTap: () => context.push('/detail', extra: items[index]),
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => context.push('/add'),
+        onPressed: () async {
+          // Attendre le retour de l'écran d'ajout pour rafraîchir la liste
+          await context.push('/add');
+          setState(() {
+            _filteredItems = dummyItems;
+          });
+        },
         child: const Icon(Icons.add),
       ),
     );

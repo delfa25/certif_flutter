@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
+import '../data/dummy_data.dart';
 import '../models/item.dart';
-import '../providers/catalog_provider.dart';
 
 class AddItemScreen extends StatefulWidget {
   const AddItemScreen({super.key});
@@ -13,42 +12,39 @@ class AddItemScreen extends StatefulWidget {
 
 class _AddItemScreenState extends State<AddItemScreen> {
   final _formKey = GlobalKey<FormState>();
+  
+  // Contrôleurs pour récupérer le texte
   final _titleController = TextEditingController();
   final _categoryController = TextEditingController();
   final _ratingController = TextEditingController();
 
-  @override
-  void dispose() {
-    _titleController.dispose();
-    _categoryController.dispose();
-    _ratingController.dispose();
-    super.dispose();
-  }
-
-  void _submit() {
+  void _saveForm() {
     if (_formKey.currentState!.validate()) {
+      // Création d'un nouvel objet Item
       final newItem = Item(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        id: DateTime.now().toString(),
         title: _titleController.text,
         category: _categoryController.text,
         rating: double.parse(_ratingController.text),
-        description: "Un nouveau film ajouté à la collection.",
+        description: 'Nouveau film ajouté au catalogue.',
         imageUrl: 'https://picsum.photos/400/300?random=${DateTime.now().millisecond}',
       );
 
-      Provider.of<CatalogProvider>(context, listen: false).addItem(newItem);
+      // Ajout à la liste globale (simple pour un débutant)
+      dummyItems.add(newItem);
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Film ajouté avec succès !')),
+        const SnackBar(content: Text('Film enregistré !')),
       );
-      context.pop();
+      
+      context.pop(); // Retour à la liste
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Ajouter un Film')),
+      appBar: AppBar(title: const Text('Nouveau Film')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -57,44 +53,28 @@ class _AddItemScreenState extends State<AddItemScreen> {
             children: [
               TextFormField(
                 controller: _titleController,
-                decoration: const InputDecoration(
-                  labelText: 'Titre du film',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (v) => v == null || v.isEmpty ? 'Veuillez entrer un titre' : null,
+                decoration: const InputDecoration(labelText: 'Titre'),
+                validator: (value) => value!.isEmpty ? 'Entrez un titre' : null,
               ),
-              const SizedBox(height: 16),
               TextFormField(
                 controller: _categoryController,
-                decoration: const InputDecoration(
-                  labelText: 'Catégorie',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (v) => v == null || v.isEmpty ? 'Veuillez entrer une catégorie' : null,
+                decoration: const InputDecoration(labelText: 'Catégorie'),
+                validator: (value) => value!.isEmpty ? 'Entrez une catégorie' : null,
               ),
-              const SizedBox(height: 16),
               TextFormField(
                 controller: _ratingController,
-                decoration: const InputDecoration(
-                  labelText: 'Note (0 - 10)',
-                  border: OutlineInputBorder(),
-                  helperText: 'Exemple: 8.5',
-                ),
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                validator: (v) {
-                  if (v == null || v.isEmpty) return 'Veuillez entrer une note';
-                  final num = double.tryParse(v);
-                  if (num == null || num < 0 || num > 10) return 'Note invalide (0 à 10)';
+                decoration: const InputDecoration(labelText: 'Note (0 à 10)'),
+                keyboardType: TextInputType.number,
+                validator: (value) {
+                  if (value!.isEmpty) return 'Entrez une note';
+                  if (double.tryParse(value) == null) return 'Nombre invalide';
                   return null;
                 },
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 20),
               ElevatedButton(
-                onPressed: _submit,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-                child: const Text('Enregistrer le Film', style: TextStyle(fontSize: 16)),
+                onPressed: _saveForm,
+                child: const Text('Enregistrer'),
               ),
             ],
           ),
