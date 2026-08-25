@@ -1,48 +1,40 @@
-# 🎬 Filmopedia — Application Flutter Multi-écrans
+# 🎬 Filmopedia — Application Flutter Multi-écrans (V1.1)
 
-Filmopedia est une application mobile & tablette moderne développée en **Flutter** permettant de parcourir un catalogue de films, d'effectuer des recherches en temps réel, de consulter les détails de chaque œuvre et d'ajouter de nouveaux films via un formulaire validé.
+Filmopedia est une application mobile & tablette moderne développée en **Flutter**. Elle permet de parcourir un catalogue de films, d'effectuer des recherches, de consulter des détails et d'ajouter de nouveaux films.
 
-Ce projet a été conçu en respectant l'architecture Clean Code, avec une séparation stricte entre les données et l'interface utilisateur, une gestion complète de la navigation réactive via `go_router`, ainsi qu'un support natif du mode Sombre / Clair et du design Responsive.
+Cette version améliore l'architecture initiale en introduisant une gestion d'état robuste avec **Provider**, des tests unitaires et de widgets, ainsi qu'une expérience utilisateur enrichie.
 
 ---
 
-## 🚀 Fonctionnalités Clés
+## 🚀 Améliorations Récentes (V1.1)
 
-- 📱 **Navigation Avancée (GoRouter 2.0)** : Navigation déclarative par routes nommées et passage d'objets complexes entre les écrans.
-- 🔍 **Recherche & Filtrage en temps réel** : Filtrage dynamique des films par titre au fur et à mesure de la saisie.
-- 📐 **Layout Responsive (Mobile & Tablette)** : Adaptation automatique de la grille (`GridView.builder` & `LayoutBuilder`) selon la largeur d'écran (2 colonnes sur smartphone, 3+ colonnes sur tablette).
-- 📝 **Formulaire d'Ajout avec Validation** : Validation côté client sur 3 champs requis (Titre, Catégorie, Note sur 10).
-- 🌓 **Support Thème Clair / Sombre** : Définition de palettes personnalisées basées sur Material 3.
-- 🧩 **Composants Réutilisables** : Conception modulaire avec widgets autonomes dans le dossier `widgets/`.
+- 🏗️ **Architecture State Management (Provider)** : Migration du stockage local vers un `CatalogProvider` pour une gestion d'état réactive et propre, éliminant les mutations d'état global non contrôlées.
+- 🧪 **Couverture de Tests** : Ajout d'une suite de tests unitaires pour la logique métier (`CatalogProvider`) et de tests de widgets pour l'interface utilisateur.
+- 🌓 **Paramètres Avancés** : Écran de paramètres enrichi permettant le contrôle précis du thème (Clair, Sombre, Système).
+- ✨ **Expérience UI/UX** : 
+  - Ajout d'animations `Hero` pour les transitions d'images.
+  - Indicateurs de chargement et gestion des erreurs d'images dans `CustomCard`.
+  - Meilleure gestion des débordements de texte pour la responsivité.
+- 📦 **Modèle de Données Immuable** : Ajout du pattern `copyWith` au modèle `Item`.
 
 ---
 
 ## 📱 Aperçu des 4 Écrans
 
-1.  **Écran de Liste (Catalogue)** : Affiche les films sous forme de grille responsive avec une barre de recherche.
-2.  **Écran de Détail** : Affiche les informations complètes d'un film sélectionné (Image, Description, Note).
-3.  **Écran de Formulaire (Ajout)** : Permet d'ajouter un nouveau film avec validation des données.
-4.  **Écran de Paramètres (Settings)** : Affiche les informations utilisateur et les détails de l'application.
+1.  **Catalogue (Liste)** : Grille responsive avec recherche en temps réel et basculement rapide de thème.
+2.  **Détails du Film** : Informations complètes avec transition fluide.
+3.  **Ajout de Film** : Formulaire complet avec validation stricte sur 3 champs.
+4.  **Paramètres** : Gestion du profil et préférences de thème.
 
 ---
 
-## 🛠️ Widgets et Architecture Technique
+## 🛠️ Stack Technique
 
-### Widgets Flutter utilisés (+8)
-- `GridView.builder` (Liste responsive)
-- `ListView` (Formulaire et Paramètres)
-- `Stack` & `Positioned` (Badge sur image)
-- `Card` & `InkWell` (Design des éléments)
-- `TextFormField` & `Form` (Validation)
-- `SingleChildScrollView` (Détails scrollables)
-- `LayoutBuilder` (Responsivité)
-- `Chip` (Catégories)
-- `UserAccountsDrawerHeader` (Profil utilisateur)
-
-### Widgets Réutilisables (`lib/widgets/`)
-1. **`CustomCard`** : Carte d'affichage d'un film.
-2. **`RatingBadge`** : Badge stylisé pour la note.
-3. **`SearchBarInput`** : Champ de recherche avec icône.
+- **Navigation** : `GoRouter` (Routes nommées).
+- **State Management** : `Provider` (Pattern ChangeNotifier).
+- **Tests** : `flutter_test` (Unit tests & Widget tests).
+- **Responsivité** : `LayoutBuilder` & `GridView`.
+- **Thème** : Material 3 (Color Scheme Seed).
 
 ---
 
@@ -50,25 +42,20 @@ Ce projet a été conçu en respectant l'architecture Clean Code, avec une sépa
 
 ```text
 lib/
-├── data/
-│   └── dummy_data.dart      # Séparation UI/Données
-├── models/
-│   └── item.dart            # Modèle Item
-├── router/
-│   └── app_router.dart      # Configuration GoRouter
-├── screens/
-│   ├── add_item_screen.dart # Formulaire (Validation 3 champs)
-│   ├── detail_screen.dart   # Détail (Passage paramètres)
-│   ├── list_screen.dart     # Liste (Recherche/Filtrage)
-│   └── settings_screen.dart # 4ème écran (Settings)
-├── theme/
-│   └── app_theme.dart       # Thème Clair/Sombre
-└── main.dart                # Point d'entrée
+├── providers/       # NOUVEAU : Gestion d'état (CatalogProvider)
+├── models/          # Modèles de données (Item avec copyWith)
+├── router/          # Configuration GoRouter
+├── screens/         # Écrans (List, Detail, Add, Settings)
+├── widgets/         # Composants réutilisables (CustomCard, etc.)
+├── theme/           # Thèmes Material 3
+└── main.dart        # Point d'entrée avec MultiProvider
 ```
+
+---
 
 ## ⚙️ Instructions de lancement
 
-1. S'assurer que Flutter est installé (`flutter doctor`).
-2. Cloner le repository.
-3. Exécuter `flutter pub get` à la racine.
-4. Lancer l'application avec `flutter run`.
+1. S'assurer que Flutter est installé.
+2. Exécuter `flutter pub get`.
+3. Pour lancer les tests : `flutter test`.
+4. Pour lancer l'app : `flutter run`.

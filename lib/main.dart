@@ -1,39 +1,32 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:certif_flutter/router/app_router.dart';
 import 'package:certif_flutter/theme/app_theme.dart';
+import 'package:certif_flutter/providers/catalog_provider.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => CatalogProvider(),
+      child: const MyApp(),
+    ),
+  );
 }
 
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  ThemeMode _themeMode = ThemeMode.system;
-
-  void _toggleTheme() {
-    setState(() {
-      _themeMode = _themeMode == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
-    });
-  }
-
-  late final GoRouter _router = createRouter(_toggleTheme);
-
-  @override
   Widget build(BuildContext context) {
+    final catalogProvider = Provider.of<CatalogProvider>(context);
+
     return MaterialApp.router(
-      title: 'Flutter Showcase',
+      title: 'Filmopedia',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      themeMode: _themeMode,
-      routerConfig: _router,
+      themeMode: catalogProvider.themeMode,
+      routerConfig: appRouter,
     );
   }
 }

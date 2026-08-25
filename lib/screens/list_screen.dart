@@ -1,69 +1,70 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:certif_flutter/data/dummy_data.dart';
-import 'package:certif_flutter/models/item.dart';
-import 'package:certif_flutter/widgets/custom_card.dart';
-import 'package:certif_flutter/widgets/search_bar_input.dart';
+import 'package:provider/provider.dart';
+import '../models/item.dart';
+import '../widgets/custom_card.dart';
+import '../widgets/search_bar_input.dart';
+import '../providers/catalog_provider.dart';
 
 class ListScreen extends StatefulWidget {
-  final VoidCallback? onToggleTheme;
-  const ListScreen({super.key, this.onToggleTheme});
+  const ListScreen({super.key});
 
   @override
   State<ListScreen> createState() => _ListScreenState();
 }
 
 class _ListScreenState extends State<ListScreen> {
-  List<Item> _filteredItems = dummyItems;
-
-  void _filter(String query) {
-    setState(() {
-      _filteredItems = dummyItems
-          .where((item) => item.title.toLowerCase().contains(query.toLowerCase()))
-          .toList();
-    });
-  }
+  String _searchQuery = '';
 
   @override
   Widget build(BuildContext context) {
+    final catalogProvider = Provider.of<CatalogProvider>(context);
+    final items = catalogProvider.items.where((item) {
+      return item.title.toLowerCase().contains(_searchQuery.toLowerCase());
+    }).toList();
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Catalogue'),
+        title: const Text('Filmopedia'),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () => context.push('/settings'),
           ),
-          if (widget.onToggleTheme != null)
-            IconButton(
-              icon: const Icon(Icons.brightness_6),
-              onPressed: widget.onToggleTheme,
-            ),
+          IconButton(
+            icon: Icon(catalogProvider.themeMode == ThemeMode.dark 
+              ? Icons.light_mode 
+              : Icons.dark_mode),
+            onPressed: () => catalogProvider.toggleTheme(),
+          ),
         ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Column(
           children: [
-            SearchBarInput(onChanged: _filter),
+            SearchBarInput(onChanged: (value) {
+              setState(() {
+                _searchQuery = value;
+              });
+            }),
             const SizedBox(height: 12),
             Expanded(
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  int crossAxisCount = constraints.maxWidth > 600 ? 3 : 2; // Responsive Mobile/Tablet
+                  int crossAxisCount = constraints.maxWidth > 600 ? 3 : 2;
                   return GridView.builder(
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: crossAxisCount,
-                      childAspectRatio: 0.8,
+                      childAspectRatio: 0.75,
                       crossAxisSpacing: 10,
                       mainAxisSpacing: 10,
                     ),
-                    itemCount: _filteredItems.length,
+                    itemCount: items.length,
                     itemBuilder: (context, index) {
-                      final item = _filteredItems[index];
                       return CustomCard(
-                        item: item,
-                        onTap: () => context.push('/detail', extra: item),
+                        item: items[index],
+                        onTap: () => context.push('/detail', extra: items[index]),
                       );
                     },
                   );
@@ -74,14 +75,7 @@ class _ListScreenState extends State<ListScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          final result = await context.push<bool>('/add');
-          if (result == true) {
-            setState(() {
-              _filteredItems = List.from(dummyItems);
-            });
-          }
-        },
+        onPressed: () => context.push('/add'),
         child: const Icon(Icons.add),
       ),
     );
